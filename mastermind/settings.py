@@ -59,13 +59,33 @@ ASGI_APPLICATION = "mastermind.asgi.application"
 # -----------------------------------------------------------------------------
 # Database
 # -----------------------------------------------------------------------------
-DATABASES = {
-    "default": dj_database_url.parse(
-        os.environ.get("DATABASE_URL", ""),
-        conn_max_age=600,
-        ssl_require=True,  # needed on Render
-    )
-}
+# mastermind/settings.py
+import os
+from pathlib import Path
+import dj_database_url
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+db_url = os.getenv("DATABASE_URL", "").strip()
+
+if db_url:
+    # Require SSL on hosted Postgres (Render, etc.)
+    DATABASES = {
+        "default": dj_database_url.parse(
+            db_url,
+            conn_max_age=600,
+            ssl_require=True,
+        )
+    }
+else:
+    # Local fallback to SQLite so dev doesn’t crash if DATABASE_URL is absent
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
+    }
+
 
 # -----------------------------------------------------------------------------
 # Password validation
