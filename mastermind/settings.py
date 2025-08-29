@@ -1,23 +1,19 @@
-
 import os
 from pathlib import Path
-import environ
+import dj_database_url
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-env = environ.Env(
-    DEBUG=(bool, True),
-    SECRET_KEY=(str, "change-me-please"),
-    ALLOWED_HOSTS=(list, ["*"]),
-    DATABASE_URL=(str, ""),
-)
-ENV_FILE = BASE_DIR.parent / ".env"
-if ENV_FILE.exists():
-    environ.Env.read_env(str(ENV_FILE))
 
-DEBUG = env("DEBUG")
-SECRET_KEY = env("SECRET_KEY")
-ALLOWED_HOSTS = env("ALLOWED_HOSTS")
+# -----------------------------------------------------------------------------
+# Core settings
+# -----------------------------------------------------------------------------
+SECRET_KEY = os.getenv("SECRET_KEY", "unsafe-default-key")  # overridden in .env / Render
+DEBUG = os.getenv("DEBUG", "0") == "1"
+ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "localhost").split(",")
 
+# -----------------------------------------------------------------------------
+# Applications
+# -----------------------------------------------------------------------------
 INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
@@ -30,7 +26,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
-    "whitenoise.middleware.WhiteNoiseMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",  # serve static files
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -58,21 +54,22 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = "mastermind.wsgi.application"
+ASGI_APPLICATION = "mastermind.asgi.application"
 
+# -----------------------------------------------------------------------------
 # Database
-DATABASE_URL = env("DATABASE_URL")
-if DATABASE_URL:
-    import dj_database_url  # type: ignore
-    DATABASES = {"default": dj_database_url.parse(DATABASE_URL, conn_max_age=600)}
-else:
-    import os, dj_database_url
-    DATABASES = {
-        "default": dj_database_url.parse(
-            os.environ.get("DATABASE_URL", ""), conn_max_age=600, ssl_require=True
-        )
-    }
+# -----------------------------------------------------------------------------
+DATABASES = {
+    "default": dj_database_url.parse(
+        os.environ.get("DATABASE_URL", ""),
+        conn_max_age=600,
+        ssl_require=True,  # needed on Render
+    )
+}
 
+# -----------------------------------------------------------------------------
 # Password validation
+# -----------------------------------------------------------------------------
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
     {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
@@ -80,16 +77,25 @@ AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
 
+# -----------------------------------------------------------------------------
+# Internationalization
+# -----------------------------------------------------------------------------
 LANGUAGE_CODE = "en-us"
 TIME_ZONE = "UTC"
 USE_I18N = True
 USE_TZ = True
 
+# -----------------------------------------------------------------------------
+# Static & Media
+# -----------------------------------------------------------------------------
 STATIC_URL = "/static/"
-STATIC_ROOT = BASE_DIR / "staticfiles"
-STATICFILES_DIRS = [BASE_DIR / "static"]
+STATIC_ROOT = BASE_DIR / "staticfiles"   # where collectstatic puts files
+STATICFILES_DIRS = [BASE_DIR / "static"] if (BASE_DIR / "static").exists() else []
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
+# -----------------------------------------------------------------------------
+# Default auto field
+# -----------------------------------------------------------------------------
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
