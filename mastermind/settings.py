@@ -11,6 +11,17 @@ SECRET_KEY = os.getenv("SECRET_KEY", "unsafe-default-key")  # overridden in .env
 DEBUG = os.getenv("DEBUG", "0") == "1"
 ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "localhost").split(",")
 
+# For Django 4+ behind HTTPS proxy (Render)
+CSRF_TRUSTED_ORIGINS = os.getenv("CSRF_TRUSTED_ORIGINS", "").split(",") if os.getenv("CSRF_TRUSTED_ORIGINS") else []
+
+# Trust Render’s proxy for HTTPS
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+
+# Good production defaults
+SESSION_COOKIE_SECURE = not (os.getenv("DEBUG", "0") == "1")
+CSRF_COOKIE_SECURE = not (os.getenv("DEBUG", "0") == "1")
+
+
 # -----------------------------------------------------------------------------
 # Applications
 # -----------------------------------------------------------------------------
