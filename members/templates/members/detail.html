@@ -1,0 +1,48 @@
+
+{% extends "members/base.html" %}
+{% block title %}{{ member.name }} · Mastermind Showcase{% endblock %}
+{% block content %}
+<a href="/">← Back</a>
+<h1>{{ member.name }}</h1>
+<p><strong>{{ member.title }}</strong></p>
+<p>{{ member.location }}</p>
+<p>{{ member.summary }}</p>
+
+<section>
+    <h3>Media</h3>
+    <div class="grid">
+        {% for media in member.media.all %}
+        <div class="card">
+            {% if media.type == "IMAGE" %}
+                <img src="{{ media.display_url }}" alt="{{ media.caption }}">
+            {% else %}
+                <video src="{{ media.display_url }}" controls></video>
+            {% endif %}
+            {% if media.caption %}<small>{{ media.caption }}</small>{% endif %}
+        </div>
+        {% empty %}
+        <p>No images or videos yet.</p>
+        {% endfor %}
+    </div>
+</section>
+
+<section>
+    <h3>Social</h3>
+    <ul>
+        {% for s in member.socials.all %}
+        <li><a href="{{ s.url }}" target="_blank">{{ s.platform }}</a></li>
+        {% empty %}
+        <li>No social links yet.</li>
+        {% endfor %}
+    </ul>
+</section>
+
+<section>
+    <h3>Quick Facts</h3>
+    <ul>
+        {% if member.skills %}<li><strong>Skills:</strong> {{ member.skills }}</li>{% endif %}
+        {% if member.goals %}<li><strong>Goals:</strong> {{ member.goals }}</li>{% endif %}
+        {% if member.email %}<li><strong>Email:</strong> <a href="mailto:{{ member.email }}">{{ member.email }}</a></li>{% endif %}
+    </ul>
+</section>
+{% endblock %}

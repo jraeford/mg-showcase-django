@@ -1,0 +1,20 @@
+
+{% extends "members/base.html" %}
+{% block title %}Home · Mastermind Showcase{% endblock %}
+{% block content %}
+<h1>Meet the Mastermind</h1>
+<div class="grid">
+    {% for m in members %}
+    <article class="card">
+        <header>
+            <h3>{{ m.name }}</h3>
+            <small>{{ m.title }}</small>
+        </header>
+        <p>{{ m.summary|default:"" }}</p>
+        <a href="{% url 'member_detail' slug=m.slug %}">View profile →</a>
+    </article>
+    {% empty %}
+    <p>No members yet. Add some in <a href="/admin/">Admin</a>.</p>
+    {% endfor %}
+</div>
+{% endblock %}
